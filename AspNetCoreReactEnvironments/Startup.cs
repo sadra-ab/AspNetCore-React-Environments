@@ -1,3 +1,4 @@
+using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -10,9 +11,12 @@ namespace AspNetCoreReactEnvironments
 {
 	public class Startup
 	{
-		public Startup(IConfiguration configuration)
+		private readonly IWebHostEnvironment _environment;
+
+		public Startup(IConfiguration configuration, IWebHostEnvironment env)
 		{
-			Configuration = configuration;
+			this.Configuration = configuration;
+			this._environment = env;
 		}
 
 		public IConfiguration Configuration { get; }
@@ -26,9 +30,14 @@ namespace AspNetCoreReactEnvironments
 			// In production, the React files will be served from this directory
 			services.AddSpaStaticFiles(configuration =>
 			{
-				configuration.RootPath = "ClientApp/build";
-			});
-		}
+				if (this._environment.EnvironmentName.Equals("staging", StringComparison.InvariantCultureIgnoreCase))
+					configuration.RootPath = "ClientApp/build/staging";
+
+				// else if (this._environment.EnvironmentName.Equals("ANOTHER_ENVIRONMENT", StringComparison.InvariantCultureIgnoreCase))
+				// 	configuration.RootPath = "ClientApp/build/ANOTHER_ENVIRONMENT";
+
+				configuration.RootPath = "ClientApp/build/production";
+			});		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
